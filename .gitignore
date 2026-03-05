@@ -33,6 +33,8 @@ ml/venv/
 ml/.venv/
 .venv/
 __pycache__/
+**/venv/
+**/.venv/
 
 # IDEs
 .vscode/
