@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "ai/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
 import { TypingIndicator } from "./TypingIndicator";
@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { RightPanel, Source } from "./RightPanel";
 import { Message } from "ai";
-import { Pencil, MoreHorizontal } from "lucide-react";
+import { Pencil, MoreHorizontal, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ChatInterfaceProps {
@@ -18,6 +18,7 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ initialMessages = [], id }: ChatInterfaceProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { messages, input, handleInputChange, handleSubmit, isLoading, error, setInput, data, append } = useChat({
     api: "/api/chat",
     initialMessages,
@@ -97,18 +98,39 @@ export function ChatInterface({ initialMessages = [], id }: ChatInterfaceProps) 
     }));
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden text-[#f5f5f5]">
+    <div className="flex h-[100dvh] bg-[#0a0a0a] overflow-hidden text-[#f5f5f5] relative">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Left Sidebar */}
-      <AppSidebar />
+      <AppSidebar className={`
+        fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 md:relative md:translate-x-0 md:z-0
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `} />
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 relative" style={{ background: 'radial-gradient(ellipse at 50% 0%, #0e2a3a 0%, #0a0a0a 60%)' }}>
+      <div className="flex-1 flex flex-col min-w-0 relative" style={{ background: 'linear-gradient(135deg, #020617 0%, #0f172a 50%, #020617 100%)' }}>
         {/* Header */}
-        <header className="h-14 border-b border-[#2a2a2a] flex items-center justify-between px-6 bg-[#0a0a0a]/80 backdrop-blur-sm shrink-0 z-10">
-            <h2 className="text-[#f5f5f5] font-medium text-sm flex items-center gap-2">
-                Nueva conversación
-                <span className="text-[#71717a] text-xs font-normal ml-2">Hoy, 10:23 AM</span>
-            </h2>
+        <header className="h-14 border-b border-[#1e293b] flex items-center justify-between px-4 md:px-6 bg-[#020617]/50 backdrop-blur-md shrink-0 z-10">
+            <div className="flex items-center gap-3">
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="md:hidden h-8 w-8 text-[#71717a] hover:text-[#f5f5f5] -ml-2"
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                >
+                    <Menu className="w-4 h-4" />
+                </Button>
+                <h2 className="text-[#f5f5f5] font-medium text-sm flex items-center gap-2">
+                    Nueva conversación
+                    <span className="text-[#71717a] text-xs font-normal ml-2 hidden sm:inline">Hoy, 10:23 AM</span>
+                </h2>
+            </div>
             <div className="flex items-center gap-2">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-[#71717a] hover:text-[#f5f5f5] hover:bg-[#2a2a2a]">
                     <Pencil className="w-4 h-4" />

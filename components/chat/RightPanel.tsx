@@ -35,15 +35,15 @@ export function RightPanel({ sources = [], traces = [] }: RightPanelProps) {
   // console.log(traces);
 
   return (
-    <div className="w-[320px] bg-[#111111] border-l border-[#2a2a2a] flex flex-col h-full shrink-0">
-      <div className="flex border-b border-[#2a2a2a]">
+    <div className="w-[320px] bg-gradient-to-b from-[#0f172a] to-[#020617] border-l border-[#1e293b] flex flex-col h-full shrink-0">
+      <div className="flex border-b border-[#1e293b] bg-[#020617]/30 backdrop-blur-sm">
         <button
           onClick={() => setActiveTab('sources')}
           className={cn(
-            "flex-1 py-3 text-sm font-medium transition-colors border-b-2",
+            "flex-1 py-3 text-xs font-semibold tracking-wider transition-all border-b-2",
             activeTab === 'sources' 
-              ? "border-[#0891b2] text-[#f5f5f5]" 
-              : "border-transparent text-[#71717a] hover:text-[#f5f5f5]"
+              ? "border-[#22d3ee] text-[#22d3ee] bg-[#0891b2]/5" 
+              : "border-transparent text-[#64748b] hover:text-[#94a3b8] hover:bg-[#1e293b]/30"
           )}
         >
           FUENTES
@@ -51,10 +51,10 @@ export function RightPanel({ sources = [], traces = [] }: RightPanelProps) {
         <button
           onClick={() => setActiveTab('traces')}
           className={cn(
-            "flex-1 py-3 text-sm font-medium transition-colors border-b-2",
+            "flex-1 py-3 text-xs font-semibold tracking-wider transition-all border-b-2",
             activeTab === 'traces' 
-              ? "border-[#0891b2] text-[#f5f5f5]" 
-              : "border-transparent text-[#71717a] hover:text-[#f5f5f5]"
+              ? "border-[#22d3ee] text-[#22d3ee] bg-[#0891b2]/5" 
+              : "border-transparent text-[#64748b] hover:text-[#94a3b8] hover:bg-[#1e293b]/30"
           )}
         >
           TRAZAS
@@ -65,33 +65,33 @@ export function RightPanel({ sources = [], traces = [] }: RightPanelProps) {
         {activeTab === 'sources' ? (
           <div className="space-y-4">
             {sources.length === 0 ? (
-              <div className="text-center text-[#71717a] py-8 text-sm">
+              <div className="text-center text-[#64748b] py-8 text-sm italic">
                 No hay fuentes recuperadas para mostrar.
               </div>
             ) : (
               sources.map((source, index) => (
-                <Card key={index} className="bg-[#1a1a1a] border-[#2a2a2a] text-[#f5f5f5]">
+                <Card key={index} className="bg-[#1e293b]/20 border-[#1e293b] text-[#f8fafc] backdrop-blur-sm shadow-lg hover:border-[#0891b2]/30 transition-all duration-300 group">
                   <CardHeader className="p-3 pb-2 space-y-0">
                     <div className="flex justify-between items-start gap-2">
-                      <CardTitle className="text-sm font-medium leading-none flex items-center gap-2 text-[#f5f5f5]">
-                        <FileText className="w-3 h-3 text-[#0891b2]" />
-                        <span className="truncate max-w-[140px]" title={source.title}>{source.title}</span>
-                        {source.page && <span className="text-[#71717a] text-xs whitespace-nowrap">pág. {source.page}</span>}
+                      <CardTitle className="text-sm font-medium leading-none flex items-center gap-2 text-[#e2e8f0]">
+                        <FileText className="w-3.5 h-3.5 text-[#22d3ee]" />
+                        <span className="truncate max-w-[140px] group-hover:text-[#22d3ee] transition-colors" title={source.title}>{source.title}</span>
+                        {source.page && <span className="text-[#64748b] text-[10px] font-mono whitespace-nowrap bg-[#0f172a] px-1.5 py-0.5 rounded">p.{source.page}</span>}
                       </CardTitle>
                       {source.similarity !== undefined && (
-                        <span className="bg-[#0891b2]/20 text-[#0891b2] text-[10px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap border border-[#0891b2]/30">
-                          {Math.round(source.similarity * 100)}% Coincidencia
+                        <span className="bg-[#0891b2]/10 text-[#22d3ee] text-[10px] px-1.5 py-0.5 rounded font-medium whitespace-nowrap border border-[#0891b2]/20 shadow-[0_0_10px_-3px_rgba(8,145,178,0.3)]">
+                          {Math.round(source.similarity * 100)}%
                         </span>
                       )}
                     </div>
                   </CardHeader>
                   <CardContent className="p-3 pt-2">
-                    <p className="text-xs text-[#a1a1aa] line-clamp-3 mb-2 font-mono bg-black/30 p-1.5 rounded">
+                    <p className="text-xs text-[#94a3b8] line-clamp-3 mb-3 font-mono bg-[#020617]/50 p-2 rounded border border-[#1e293b]/50 leading-relaxed">
                       {source.content}
                     </p>
                     <Button 
                       variant="link" 
-                      className="h-auto p-0 text-[#0891b2] text-xs hover:text-[#0891b2]/80"
+                      className="h-auto p-0 text-[#22d3ee] text-xs hover:text-[#67e8f9] font-medium"
                       onClick={() => source.url && window.open(source.url, '_blank')}
                       disabled={!source.url}
                     >

@@ -1,30 +1,79 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ChevronDown, 
   Plus, 
   Database, 
   Brain, 
   LayoutGrid,
-  Zap
+  Zap,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  className?: string;
+}
+
+export function AppSidebar({ className }: AppSidebarProps) {
+  const [width, setWidth] = useState(280);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const [topK, setTopK] = useState(5);
   const [creativity, setCreativity] = useState(0.7);
   const [documents, setDocuments] = useState<{id: string, name: string}[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Efecto para cargar documentos al inicio
   useEffect(() => {
     fetchDocuments();
-    
-    // Escuchar evento de actualización si se implementa
     window.addEventListener('document-uploaded', fetchDocuments);
     return () => window.removeEventListener('document-uploaded', fetchDocuments);
   }, []);
+
+  const startResizing = useCallback((mouseDownEvent: React.MouseEvent) => {
+    mouseDownEvent.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  const resize = useCallback(
+    (mouseMoveEvent: MouseEvent) => {
+      if (isResizing) {
+        const newWidth = mouseMoveEvent.clientX;
+        if (newWidth > 240 && newWidth < 480) {
+          setWidth(newWidth);
+        }
+      }
+    },
+    [isResizing]
+  );
+
+  useEffect(() => {
+    window.addEventListener("mousemove", resize);
+    window.addEventListener("mouseup", stopResizing);
+    return () => {
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
+    };
+  }, [resize, stopResizing]);
 
   async function fetchDocuments() {
     try {
@@ -38,18 +87,60 @@ export function AppSidebar() {
     }
   }
 
+  function handleDeleteClick(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setDocumentToDelete(id);
+    setDeleteDialogOpen(true);
+  }
+
+  async function confirmDelete() {
+    if (!documentToDelete) return;
+    
+    try {
+      const res = await fetch(`/api/documents?id=${documentToDelete}`, { method: "DELETE" });
+      if (res.ok) {
+        setDocuments(documents.filter(d => d.id !== documentToDelete));
+        toast({
+          title: "Documento eliminado",
+          description: "El documento ha sido eliminado correctamente."
+        });
+      } else {
+        throw new Error("Failed to delete");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error al eliminar documento",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setDocumentToDelete(null);
+    }
+  }
+
   return (
-    <div className="w-[280px] bg-[#111111] border-r border-[#2a2a2a] flex flex-col h-full text-[#f5f5f5] shrink-0">
+    <div 
+      ref={sidebarRef}
+      className={cn("bg-gradient-to-b from-[#0f172a] to-[#020617] border-r border-[#1e293b] flex flex-col h-full text-[#f8fafc] shrink-0 relative group/sidebar", className)}
+      style={{ width: width }}
+    >
+      {/* Resizer Handle */}
+      <div
+        className="absolute right-0 top-0 w-1 h-full cursor-col-resize hover:bg-cyan-500/50 transition-colors z-50"
+        onMouseDown={startResizing}
+      />
+
       {/* Header */}
-      <div className="p-4 border-b border-[#2a2a2a] flex items-center gap-3">
-        <div className="w-8 h-8 rounded bg-gradient-to-br from-[#0891b2] to-[#06b6d4] flex items-center justify-center shadow-lg shadow-[#0891b2]/20">
+      <div className="p-4 border-b border-[#1e293b] flex items-center gap-3 shrink-0 bg-[#020617]/30 backdrop-blur-sm">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#06b6d4] to-[#0891b2] flex items-center justify-center shadow-lg shadow-[#0891b2]/20 ring-1 ring-[#22d3ee]/20">
           <Brain className="w-5 h-5 text-white" />
         </div>
-        <span className="font-bold text-lg tracking-tight">Nexus RAG</span>
+        <span className="font-bold text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-[#cbd5e1]">Nexus RAG</span>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-6">
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="p-4 space-y-6 pb-10">
           
           {/* Espacio de Trabajo */}
           <section>
@@ -75,8 +166,17 @@ export function AppSidebar() {
             <div className="space-y-1 mb-3">
               {documents.length > 0 ? (
                 documents.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between px-3 py-2 rounded-md hover:bg-[#1a1a1a] cursor-pointer transition-colors text-[#71717a] hover:text-[#f5f5f5]">
-                    <div className="flex items-center gap-2 truncate">
+                  <div key={doc.id} className="group flex items-center px-3 py-2 rounded-md hover:bg-[#1a1a1a] cursor-pointer transition-colors text-[#71717a] hover:text-[#f5f5f5]">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 text-[#71717a] hover:text-red-500 hover:bg-red-500/10 shrink-0 mr-2"
+                      onClick={(e) => handleDeleteClick(doc.id, e)}
+                      title="Eliminar documento"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                    <div className="flex items-center gap-2 truncate flex-1 min-w-0">
                       <Database className="w-4 h-4 shrink-0" />
                       <span className="text-sm truncate" title={doc.name}>{doc.name}</span>
                     </div>
@@ -163,6 +263,25 @@ export function AppSidebar() {
 
         </div>
       </ScrollArea>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="bg-[#1a1a1a] border-[#2a2a2a] text-[#f5f5f5]">
+          <DialogHeader>
+            <DialogTitle>¿Eliminar documento?</DialogTitle>
+            <DialogDescription className="text-[#a1a1aa]">
+              Esta acción no se puede deshacer. El documento será eliminado permanentemente de la base de conocimiento.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} className="bg-transparent border-[#2a2a2a] text-[#f5f5f5] hover:bg-[#2a2a2a] hover:text-white">
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete} className="bg-red-900/50 hover:bg-red-900/70 text-red-200 border border-red-900">
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
