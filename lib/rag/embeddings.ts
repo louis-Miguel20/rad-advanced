@@ -7,13 +7,13 @@ let embeddingsInstance: OpenAIEmbeddings | null = null;
 function getEmbeddingsInstance() {
   if (!embeddingsInstance) {
     const apiKey = process.env.OPENAI_API_KEY;
-    // During build time or if key is missing, this might fail if we initialize strictly.
-    // However, we only initialize when needed (runtime).
+    // Durante el tiempo de compilación o si falta la clave, esto podría fallar si inicializamos estrictamente.
+    // Sin embargo, solo inicializamos cuando es necesario (tiempo de ejecución).
     embeddingsInstance = new OpenAIEmbeddings({
       model: "text-embedding-3-small",
       // Asegurar que las dimensiones coincidan con la base de datos (1536 es standard)
       dimensions: 1536,
-      apiKey: apiKey || "dummy-key-for-build", // Fallback for build time if somehow instantiated
+      apiKey: apiKey || "dummy-key-for-build", // Clave de respaldo para tiempo de compilación si se instancia de alguna manera
     });
   }
   return embeddingsInstance;

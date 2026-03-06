@@ -16,7 +16,7 @@ function getPool() {
       connectionTimeoutMillis: 10000,
     });
     
-    // Force UTF-8 client encoding for Windows environments
+    // Forzar codificación de cliente UTF-8 para entornos Windows
     pool.on('connect', async (client) => {
       await client.query("SET client_encoding = 'UTF8'");
     });
