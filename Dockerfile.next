@@ -1,23 +1,23 @@
 
 FROM node:22-alpine AS base
 
-# Install dependencies only when needed
+# Instalar dependencias solo cuando sea necesario
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+# Consulta https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine para entender por qué podría ser necesario libc6-compat.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# Instalar dependencias basadas en el gestor de paquetes preferido
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile --ignore-scripts; \
   elif [ -f package-lock.json ]; then npm ci --legacy-peer-deps --ignore-scripts; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile --ignore-scripts; \
-  else echo "Lockfile not found." && exit 1; \
+  else echo "No se encontró archivo lock." && exit 1; \
   fi
 
 
-# Rebuild the source code only when needed
+# Reconstruir el código fuente solo cuando sea necesario
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -28,24 +28,24 @@ RUN mkdir -p public
 
 
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
+# Next.js recopila datos de telemetría completamente anónimos sobre el uso general.
+# Aprende más aquí: https://nextjs.org/telemetry
+# Descomenta la siguiente línea si deseas deshabilitar la telemetría durante la construcción.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
+  else echo "No se encontró archivo lock." && exit 1; \
   fi
 
-# Production image, copy all the files and run next
+# Imagen de producción, copiar todos los archivos y ejecutar next
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
+# Descomenta la siguiente línea si deseas deshabilitar la telemetría durante el tiempo de ejecución.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
@@ -53,11 +53,11 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 
-# Set the correct permission for prerender cache
+# Establecer el permiso correcto para la caché de prerenderizado
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
-# Automatically leverage output traces to reduce image size
+# Aprovechar automáticamente las trazas de salida para reducir el tamaño de la imagen
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
@@ -67,7 +67,7 @@ USER nextjs
 EXPOSE 3000
 
 ENV PORT=3000
-# set hostname to localhost
+# establecer hostname a localhost
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
