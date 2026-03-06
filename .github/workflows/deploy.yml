@@ -96,8 +96,8 @@ jobs:
       - name: Build and push FastAPI
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile.ml
+          context: ml
+          file: ml/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/nexusrag-ml:latest
