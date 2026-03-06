@@ -15,7 +15,7 @@ export interface Source {
   url?: string;
 }
 
-interface Trace {
+export interface Trace {
   step: string;
   query: string;
   latency: number;
@@ -109,7 +109,7 @@ export function RightPanel({ sources = [], traces = [] }: RightPanelProps) {
                 No hay trazas disponibles.
               </div>
             ) : (
-              traces.map((trace: any, index: number) => (
+              traces.map((trace, index) => (
                 <Card key={index} className="bg-[#1a1a1a] border-[#2a2a2a] text-[#f5f5f5]">
                   <CardHeader className="p-3 pb-2">
                     <CardTitle className="text-sm font-medium text-[#0891b2] flex justify-between">

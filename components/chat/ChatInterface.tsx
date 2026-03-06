@@ -7,7 +7,7 @@ import { ChatInput } from "./ChatInput";
 import { TypingIndicator } from "./TypingIndicator";
 import { useToast } from "@/hooks/use-toast";
 import { AppSidebar } from "@/components/layout/AppSidebar";
-import { RightPanel, Source } from "./RightPanel";
+import { RightPanel, Source, Trace } from "./RightPanel";
 import { Message } from "ai";
 import { Pencil, MoreHorizontal, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,25 @@ interface ChatInterfaceProps {
   id?: string;
 }
 
+interface RawSource {
+  documentTitle?: string;
+  title?: string;
+  content?: string;
+  similarity?: number;
+  score?: number;
+  page?: number;
+  url?: string;
+}
+
+interface StreamItem {
+  type?: string;
+  sources?: RawSource[];
+  trace?: Trace;
+}
+
 export function ChatInterface({ initialMessages = [], id }: ChatInterfaceProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error, setInput, data, append } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error, data, append } = useChat({
     api: "/api/chat",
     initialMessages,
     body: { conversationId: id },
@@ -48,29 +64,22 @@ export function ChatInterface({ initialMessages = [], id }: ChatInterfaceProps) 
     scrollToBottom();
   }, [messages, isLoading]);
 
-  interface RawSource {
-    documentTitle?: string;
-    title?: string;
-    content?: string;
-    similarity?: number;
-    score?: number;
-    page?: number;
-    url?: string;
-  }
-
   // Extraer fuentes y trazas del flujo de datos o mensajes
   let rawSources: RawSource[] = [];
-  let traces: any[] = [];
+  let traces: Trace[] = [];
   
   // 1. Intentar obtener fuentes y trazas desde StreamData (método preferido)
   if (data && data.length > 0) {
-    const lastSourceData = [...data].reverse().find((item: any) => item && item.type === 'sources');
-    if (lastSourceData) {
-      rawSources = (lastSourceData as any).sources || [];
+    const streamItems = data as unknown as StreamItem[];
+    const lastSourceData = [...streamItems].reverse().find((item) => item && item.type === 'sources');
+    if (lastSourceData && lastSourceData.sources) {
+      rawSources = lastSourceData.sources;
     }
     
     // Recopilar todas las trazas
-    traces = data.filter((item: any) => item && item.type === 'trace').map((item: any) => item.trace);
+    traces = streamItems
+      .filter((item) => item && item.type === 'trace' && item.trace)
+      .map((item) => item.trace!);
   }
 
   // 2. Usar anotaciones como respaldo si el flujo de datos está vacío (para compatibilidad con versiones anteriores)
@@ -163,7 +172,6 @@ export function ChatInterface({ initialMessages = [], id }: ChatInterfaceProps) 
               handleInputChange={handleInputChange} 
               handleSubmit={handleSubmit} 
               isLoading={isLoading}
-              setInput={setInput}
               append={append}
           />
         </div>

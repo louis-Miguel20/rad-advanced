@@ -30,7 +30,7 @@ export async function getDocuments(): Promise<Document[]> {
       ORDER BY "createdAt" DESC
     `);
 
-    return result.rows.map((row, index) => ({
+    return result.rows.map((row) => ({
       id: row.name, // Usamos el nombre como ID temporalmente
       name: row.name,
       chunkCount: parseInt(row.chunkCount),
@@ -64,6 +64,6 @@ export async function deleteDocument(id: string): Promise<void> {
 }
 
 // Funciones legacy eliminadas para evitar confusión con el esquema simple actual
-export async function createDocument(data: any) { console.warn("Legacy createDocument called but ignored"); return null; }
-export async function updateDocumentStatus(id: string, status: any) { console.warn("Legacy updateDocumentStatus called but ignored"); return null; }
-export async function createDocumentChunk(data: any) { console.warn("Legacy createDocumentChunk called but ignored"); return null; }
+export async function createDocument(_data: unknown) { void _data; console.warn("Legacy createDocument called but ignored"); return null; }
+export async function updateDocumentStatus(_id: string, _status: unknown) { void _id; void _status; console.warn("Legacy updateDocumentStatus called but ignored"); return null; }
+export async function createDocumentChunk(_data: unknown) { void _data; console.warn("Legacy createDocumentChunk called but ignored"); return null; }

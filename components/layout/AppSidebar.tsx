@@ -107,7 +107,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
       } else {
         throw new Error("Failed to delete");
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Error al eliminar documento",

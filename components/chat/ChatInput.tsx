@@ -10,11 +10,10 @@ interface ChatInputProps {
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
-  setInput: (value: string) => void;
   append?: (message: Message | Omit<Message, 'id'>) => Promise<string | null | undefined>;
 }
 
-export function ChatInput({ input, handleInputChange, handleSubmit, isLoading, setInput, append }: ChatInputProps) {
+export function ChatInput({ input, handleInputChange, handleSubmit, isLoading, append }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
