@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { DocumentStatus } from '@prisma/client';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -9,6 +10,7 @@ export interface Document {
   name: string;
   chunkCount: number;
   createdAt: Date;
+  status: DocumentStatus;
 }
 
 /**
@@ -35,6 +37,7 @@ export async function getDocuments(): Promise<Document[]> {
       name: row.name,
       chunkCount: parseInt(row.chunkCount),
       createdAt: row.createdAt ? new Date(row.createdAt) : new Date(),
+      status: DocumentStatus.READY, // Simulamos el estado ya que no se guarda en DB
     }));
   } catch (error) {
     console.error("Error al obtener documentos:", error);

@@ -3,16 +3,6 @@ import { ConversationSidebar } from "@/components/chat/ConversationSidebar";
 import { prisma } from "@/lib/db/prisma";
 import { redirect } from "next/navigation";
 
-interface Source {
-  documentTitle?: string;
-  title?: string;
-  content?: string;
-  similarity?: number;
-  score?: number;
-  page?: number;
-  url?: string;
-}
-
 export default async function ChatIdPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
@@ -34,7 +24,7 @@ export default async function ChatIdPage({ params }: { params: Promise<{ id: str
     id: msg.id,
     role: msg.role.toLowerCase() as "system" | "user" | "assistant" | "data",
     content: msg.content,
-    annotations: msg.sources ? [{ sources: msg.sources as unknown as Source[] }] : [],
+    annotations: msg.sources ? [{ sources: JSON.parse(JSON.stringify(msg.sources)) }] : [],
   }));
 
   return (
