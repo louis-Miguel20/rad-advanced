@@ -4,17 +4,25 @@ import { Document } from "langchain/document";
 
 // Configuración de conexión a PostgreSQL
 // Se asume que la extensión 'vector' ya está habilitada en la DB
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000, // Increased timeout to avoid cold start issues
-});
 
-// Force UTF-8 client encoding for Windows environments
-pool.on('connect', async (client) => {
-  await client.query("SET client_encoding = 'UTF8'");
-});
+let pool: Pool | null = null;
+
+function getPool() {
+  if (!pool) {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    });
+    
+    // Force UTF-8 client encoding for Windows environments
+    pool.on('connect', async (client) => {
+      await client.query("SET client_encoding = 'UTF8'");
+    });
+  }
+  return pool;
+}
 
 interface SearchResult {
   id: number;
@@ -48,7 +56,7 @@ export class VectorStore {
         LIMIT $2
       `;
 
-      const { rows } = await pool.query(sql, [vectorStr, k]);
+      const { rows } = await getPool().query(sql, [vectorStr, k]);
 
       return rows.map((row: SearchResult) => new Document({
         pageContent: row.content,
@@ -74,7 +82,7 @@ export class VectorStore {
   async addDocuments(documents: Document[]): Promise<void> {
     if (documents.length === 0) return;
 
-    const client = await pool.connect();
+    const client = await getPool().connect();
     try {
       await client.query('BEGIN');
 
