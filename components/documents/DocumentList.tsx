@@ -8,12 +8,15 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 
+// Definir el tipo DocumentStatus localmente ya que no se exporta desde @prisma/client
+type DocumentStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+
 interface Document {
   id: string;
   title: string;
   sourceType: string;
   chunkCount: number;
-  status: string;
+  status: DocumentStatus;
   createdAt: string;
 }
 

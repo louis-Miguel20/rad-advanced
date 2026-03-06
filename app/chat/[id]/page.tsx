@@ -22,9 +22,9 @@ export default async function ChatIdPage({ params }: { params: Promise<{ id: str
   // Convert Prisma messages to Vercel AI SDK format
   const initialMessages = conversation.messages.map((msg) => ({
     id: msg.id,
-    role: msg.role.toLowerCase(),
+    role: msg.role.toLowerCase() as "system" | "user" | "assistant" | "data",
     content: msg.content,
-    annotations: msg.sources ? [{ sources: msg.sources }] : [],
+    annotations: msg.sources ? [{ sources: msg.sources as any }] : [],
   }));
 
   return (

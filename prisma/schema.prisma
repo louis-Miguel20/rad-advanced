@@ -17,3 +17,37 @@ model Document {
 
   @@map("documents")
 }
+
+enum DocumentStatus {
+  PROCESSING
+  READY
+  ERROR
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model Conversation {
+  id        String    @id @default(uuid())
+  title     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  role           MessageRole
+  createdAt      DateTime     @default(now())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sources        Json?
+
+  @@map("messages")
+}
