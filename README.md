@@ -1,3 +1,4 @@
+[![CI/CD Pipeline](https://github.com/louis-Miguel20/rad-advanced/actions/workflows/deploy.yml/badge.svg)](https://github.com/louis-Miguel20/rad-advanced/actions/workflows/deploy.yml)
 # Sistema RAG Avanzado
 
 Este proyecto es un sistema completo de Generación Aumentada por Recuperación (RAG) construido con tecnologías modernas como Next.js, Python (FastAPI), PostgreSQL (pgvector) y MLflow. Está diseñado para ofrecer una experiencia robusta y escalable para la ingestión y consulta de documentos mediante inteligencia artificial.
