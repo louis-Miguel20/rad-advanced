@@ -10,7 +10,7 @@ async def ingest_document(
     url: Optional[str] = Form(None)
 ):
     if not file and not url:
-        raise HTTPException(status_code=400, detail="No file or URL provided")
+        raise HTTPException(status_code=400, detail="No se proporcionó archivo ni URL")
     
     try:
         if file:
@@ -20,6 +20,6 @@ async def ingest_document(
             
         return result
     except Exception as e:
-        # Log error
-        print(f"Error processing document: {e}")
+        # Registrar error
+        print(f"Error procesando documento: {e}")
         raise HTTPException(status_code=500, detail=str(e))

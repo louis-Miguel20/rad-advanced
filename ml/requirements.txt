@@ -6,3 +6,9 @@ pgvector==0.2.5
 openai==1.12.0
 langchain==0.1.10
 python-multipart==0.0.9
+# Dependencias para procesamiento de documentos
+pypdf==3.17.4
+python-docx==1.1.0
+requests==2.31.0
+beautifulsoup4==4.12.3
+setuptools

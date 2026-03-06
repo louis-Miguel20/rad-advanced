@@ -21,8 +21,8 @@ async def process_file(file: UploadFile):
             for para in doc.paragraphs:
                 text += para.text + "\n"
         
-        # Normalize text
-        text = text.replace('\x00', '') # Remove null bytes
+        # Normalizar texto
+        text = text.replace('\x00', '') # Eliminar bytes nulos
         
         return {"text": text, "filename": filename, "size": len(content), "status": "processed"}
     except Exception as e:
@@ -33,13 +33,13 @@ async def process_url(url: str):
         response = requests.get(url, timeout=10)
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Remove scripts and styles
+        # Eliminar scripts y estilos
         for script in soup(["script", "style", "nav", "footer", "header"]):
             script.decompose()
             
         text = soup.get_text()
         
-        # Clean text
+        # Limpiar texto
         lines = (line.strip() for line in text.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         text = '\n'.join(chunk for chunk in chunks if chunk)

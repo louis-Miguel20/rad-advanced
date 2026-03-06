@@ -33,5 +33,5 @@ async def log_experiment(run_data: ExperimentRun):
             }
             
     except Exception as e:
-        print(f"MLflow logging error: {e}")
+        print(f"Error de registro en MLflow: {e}")
         raise HTTPException(status_code=500, detail=str(e))
